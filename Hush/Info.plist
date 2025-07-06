@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>Hush needs accessibility access to provide advanced features and keyboard shortcuts.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Hush needs audio capture access to transcribe audio from other apps.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<false/>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>Hush needs screen capture access to analyze screenshots and capture system audio.</string>
+</dict>
+</plist>
