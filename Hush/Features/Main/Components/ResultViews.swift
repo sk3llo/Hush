@@ -44,40 +44,46 @@ struct ResultsView: View {
             VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
             
             // Content area
-            if let structured = structuredContent {
-                // Use the structured content view when available
+            ScrollViewReader { proxy in
                 ScrollView {
-                    StreamContentView(content: structured)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .id("structuredResults")
+                    if let structured = structuredContent {
+                        // Use the structured content view when available
+                        StreamContentView(content: structured)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .id("structuredResults")
+                    } else {
+                        // Fall back to plain text for backward compatibility
+                        Text(LocalizedStringKey(content))
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, Constants.UI.dividerHeight / 2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .id("resultsText")
+                    }
                 }
                 .accessibilityIdentifier("resultsScrollView")
-            } else {
-                // Fall back to plain text for backward compatibility
-            ScrollView {
-                    Text(LocalizedStringKey(content))
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundColor(.primary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, Constants.UI.dividerHeight / 2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .id("resultsText") // Add ID for scrolling
+                .onChange(of: structuredContent?.items.count) { oldCount, newCount in
+                    if isAutoScrollEnabled {
+                        withAnimation {
+                            proxy.scrollTo(structuredContent?.items.last?.id ?? "resultsText", anchor: .bottom)
+                        }
+                    }
+                }
             }
-            .accessibilityIdentifier("resultsScrollView")
-            }
-            
+
             // Indicators (positioned in bottom right)
             VStack {
                 Spacer()
                 HStack {
                     Spacer()
-                    
+
                     // Streaming indicator (shows only when streaming)
                     if isStreaming {
                         StreamingIndicator()
                             .padding(.trailing, 8)
                     }
-                    
+
                     // Auto-scroll indicator
                     ResultsScrollIndicator(isEnabled: isAutoScrollEnabled, action: toggleAutoScroll)
                 }
@@ -97,7 +103,7 @@ struct EnhancedResultsView: View {
     @Binding var isAutoScrollEnabled: Bool
     let toggleAutoScroll: () -> Void
     var isStreaming: Bool = false
-    
+
     // MARK: - Body
     var body: some View {
         ResultsView(
@@ -114,16 +120,14 @@ struct EnhancedResultsView: View {
 struct ResultsScrollIndicator: View {
     let isEnabled: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Image(systemName: "arrow.down.doc")
                     .font(.system(size: 10))
-                
-                Text(
-//                    isEnabled ? "AUTO" :
-                        "MANUAL")
+
+                Text(isEnabled ? "AUTO" : "MANUAL")
                     .font(.system(size: 9, weight: .medium))
             }
             .padding(.horizontal, 6)
@@ -140,7 +144,7 @@ struct ResultsScrollIndicator: View {
 struct StreamingIndicator: View {
     // Animation state
     @State private var isAnimating = false
-    
+
     var body: some View {
         HStack(spacing: 4) {
             // Animated dots
@@ -158,7 +162,7 @@ struct StreamingIndicator: View {
                         )
                 }
             }
-            
+
             Text("STREAMING")
                 .font(.system(size: 9, weight: .medium))
                 .foregroundColor(.blue)
@@ -183,7 +187,7 @@ struct ProcessingIndicator: View {
             ProgressView()
                 .scaleEffect(0.7)
                 .progressViewStyle(CircularProgressViewStyle())
-            
+
             Text("PROCESSING")
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
@@ -196,7 +200,7 @@ struct ProcessButton: View {
     let isProcessing: Bool
     let canProcess: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
@@ -206,15 +210,19 @@ struct ProcessButton: View {
                         .scaleEffect(0.7)
                         .progressViewStyle(CircularProgressViewStyle())
                         .frame(width: 16, height: 16)
+
+                    Text("PROCESSING")
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
                 } else {
                     // Normal state (icon removed)
                     Text("PROCESS")
                         .fontWeight(.medium)
                         .foregroundColor(canProcess ? .primary : .gray.opacity(0.5))
-                    
+
                     // Return key symbol
                     ShortcutKey(key: "⇧")
-                    
+
                     Text("S")
                         .font(.system(size: 10, weight: .medium))
                         .frame(width: 15, height: 15)

@@ -56,6 +56,12 @@ final class SettingsViewModel: ObservableObject {
     /// Temporary content for new memory entry
     @Published var newMemoryContent: String = ""
 
+    /// Selected theme for light mode
+    @Published var lightTheme: String = "sunset"
+
+    /// Selected theme for dark mode
+    @Published var darkTheme: String = "wwdc17"
+
     // MARK: - Private Properties
 
     /// Reference to the app's global state
@@ -119,6 +125,10 @@ final class SettingsViewModel: ObservableObject {
 
         // Load memory entries
         self.memories = preferences.memories
+
+        // Load theme preferences
+        self.lightTheme = preferences.lightTheme
+        self.darkTheme = preferences.darkTheme
     }
 
     /// Set up two-way bindings between view model and app state
@@ -185,6 +195,10 @@ final class SettingsViewModel: ObservableObject {
 
     /// Save all settings to persistent storage
     func saveSettings() {
+        // Save to app state
+        appState.isAlwaysOnTop = isAlwaysOnTop
+        appState.windowOpacity = defaultOpacity
+
         // Save to preferences
         preferences.isAlwaysOnTop = isAlwaysOnTop
         preferences.windowOpacity = defaultOpacity
@@ -198,6 +212,15 @@ final class SettingsViewModel: ObservableObject {
         preferences.geminiApiKey = geminiApiKey
         preferences.openAIApiKey = openAIApiKey
         preferences.model = model
+
+        preferences.audioSource = audioSource
+        preferences.lightTheme = lightTheme
+        preferences.darkTheme = darkTheme
+
+        // Save API key if not empty
+        if !geminiApiKey.isEmpty {
+            preferences.geminiApiKey = geminiApiKey
+        }
 
         // Save memories
         preferences.memories = memories
